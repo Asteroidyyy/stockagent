@@ -14,6 +14,9 @@ def score_position(
     momentum_5d = float(stock_snapshot.get("momentum_5d", 0))
     drawdown_20d = float(stock_snapshot.get("drawdown_20d", 0))
     volatility_10d = float(stock_snapshot.get("volatility_10d", 0))
+    turnover_rate = float(stock_snapshot.get("turnover_rate", 0))
+    amount_ratio_5d = float(stock_snapshot.get("amount_ratio_5d", 1))
+    amount_ratio_20d = float(stock_snapshot.get("amount_ratio_20d", 1))
     close_price = float(stock_snapshot.get("close", 0))
 
     action = "hold"
@@ -26,6 +29,7 @@ def score_position(
         "momentum": 0.0,
         "drawdown": 0.0,
         "volatility": 0.0,
+        "activity": 0.0,
         "event": 0.0,
     }
     score_explanations = {
@@ -34,6 +38,7 @@ def score_position(
         "momentum": "5日动量修正。",
         "drawdown": "相对20日高点回撤修正。",
         "volatility": "10日波动率修正。",
+        "activity": "换手率与成交额活跃度修正。",
         "event": "风险事件、止盈止损和仓位约束修正。",
     }
 
@@ -75,6 +80,49 @@ def score_position(
     else:
         score_explanations["volatility"] = f"10日波动率 {volatility_10d:.1%}，风险可控。"
 
+    activity_delta = 0.0
+    activity_reasons: list[str] = []
+    if turnover_rate and turnover_rate < 0.005:
+        activity_delta -= 3
+        activity_reasons.append(f"换手率偏低 {turnover_rate:.1%}")
+    elif 0.01 <= turnover_rate <= 0.08:
+        activity_delta += 2
+        activity_reasons.append(f"换手率健康 {turnover_rate:.1%}")
+    elif turnover_rate >= 0.15:
+        activity_delta -= 2
+        risk_flags.append("high_turnover")
+        activity_reasons.append(f"换手率过高 {turnover_rate:.1%}")
+
+    if amount_ratio_5d >= 1.5 and amount_ratio_20d >= 1.2:
+        if price_change > 0:
+            activity_delta += 4
+            activity_reasons.append(
+                f"成交额放大，5日比 {amount_ratio_5d:.1f} 倍，20日比 {amount_ratio_20d:.1f} 倍"
+            )
+        elif price_change < -0.02:
+            activity_delta -= 4
+            risk_flags.append("volume_selloff")
+            activity_reasons.append(
+                f"放量下跌，5日比 {amount_ratio_5d:.1f} 倍，20日比 {amount_ratio_20d:.1f} 倍"
+            )
+    elif amount_ratio_5d <= 0.6 and price_change > 0.02:
+        activity_delta -= 2
+        activity_reasons.append(f"缩量上涨，成交额仅为5日均值 {amount_ratio_5d:.1f} 倍")
+
+    if turnover_rate >= 0.15 and price_change >= 0.07:
+        activity_delta -= 3
+        risk_flags.append("overheat")
+        activity_reasons.append("高换手大涨，短线过热")
+
+    activity_delta = max(-8.0, min(6.0, activity_delta))
+    adjusted_score += activity_delta
+    score_breakdown["activity"] += activity_delta
+    if activity_reasons:
+        reasons.extend(activity_reasons)
+        score_explanations["activity"] = "；".join(activity_reasons) + f"，修正 {activity_delta:+.1f}。"
+    else:
+        score_explanations["activity"] = "换手率与成交额未出现显著放大、萎缩或过热信号。"
+
     adjusted_score = max(0.0, min(100.0, adjusted_score))
 
     if position.weight == 0:
@@ -84,6 +132,7 @@ def score_position(
             and momentum_5d >= 0.03
             and drawdown_20d >= -0.06
             and volatility_10d < 0.03
+            and score_breakdown["activity"] >= 0
             and not risk_flags
         )
         if can_open:
@@ -101,6 +150,7 @@ def score_position(
             and momentum_5d > 0
             and drawdown_20d > -0.08
             and volatility_10d < 0.035
+            and score_breakdown["activity"] >= -2
             and market_regime not in {"弱势", "震荡偏弱"}
         )
         if can_add:

@@ -200,6 +200,7 @@ class ReportService:
                 and not item.risk_flags
                 and item.score_breakdown.get("momentum", 0.0) > 0
                 and item.score_breakdown.get("volatility", 0.0) >= 0
+                and item.score_breakdown.get("activity", 0.0) >= 0
             ]
             for item in qualified[:max_entries]:
                 item.action = "buy_more"
@@ -236,11 +237,14 @@ class ReportService:
         momentum_score = signal.score_breakdown.get("momentum", 0.0)
         drawdown_score = signal.score_breakdown.get("drawdown", 0.0)
         volatility_score = signal.score_breakdown.get("volatility", 0.0)
+        activity_score = signal.score_breakdown.get("activity", 0.0)
         if trend_score < 60:
             return False
         if momentum_score < 0 and drawdown_score < 0:
             return False
         if volatility_score < -5:
+            return False
+        if activity_score < -4:
             return False
         return True
 
@@ -248,10 +252,11 @@ class ReportService:
         trend_score = signal.score_breakdown.get("trend", 0.0)
         momentum_score = signal.score_breakdown.get("momentum", 0.0)
         volatility_score = signal.score_breakdown.get("volatility", 0.0)
+        activity_score = signal.score_breakdown.get("activity", 0.0)
         drawdown_score = signal.score_breakdown.get("drawdown", 0.0)
         return (
             signal.score,
-            trend_score + momentum_score,
+            trend_score + momentum_score + activity_score,
             drawdown_score - abs(volatility_score),
             -len(signal.risk_flags),
         )

@@ -122,6 +122,16 @@ class AkshareMarketDataProvider(MarketDataProvider):
         volatility_10d = float(pct_change_series.tail(10).std()) if len(prepared) >= 10 else float(
             pct_change_series.std()
         )
+        amount_5d = float(prepared["amount"].tail(5).mean()) if len(prepared) >= 5 else float(prepared["amount"].mean())
+        amount_20d = (
+            float(prepared["amount"].tail(20).mean())
+            if len(prepared) >= 20
+            else float(prepared["amount"].mean())
+        )
+        latest_amount = float(latest["amount"])
+        amount_ratio_5d = latest_amount / amount_5d if amount_5d else 1.0
+        amount_ratio_20d = latest_amount / amount_20d if amount_20d else 1.0
+        turnover_rate = float(latest.get("turnover_rate", 0.0) or 0.0) / 100
 
         trend_score = self._score_trend(
             latest_close=float(latest["close"]),
@@ -149,6 +159,9 @@ class AkshareMarketDataProvider(MarketDataProvider):
             "momentum_5d": float(latest["close"]) / lookback_close - 1 if lookback_close else 0.0,
             "drawdown_20d": float(latest["close"]) / recent_high - 1 if recent_high else 0.0,
             "volatility_10d": volatility_10d if pd.notna(volatility_10d) else 0.0,
+            "turnover_rate": turnover_rate if pd.notna(turnover_rate) else 0.0,
+            "amount_ratio_5d": amount_ratio_5d if pd.notna(amount_ratio_5d) else 1.0,
+            "amount_ratio_20d": amount_ratio_20d if pd.notna(amount_ratio_20d) else 1.0,
             "event_tags": event_tags,
         }
         self.cache.save(self._cache_key(symbol, as_of_date), snapshot)
@@ -220,6 +233,8 @@ class AkshareMarketDataProvider(MarketDataProvider):
             renamed["pct_change"] = close_series.pct_change() * 100
         if "volume" not in renamed.columns:
             renamed["volume"] = 0.0
+        if "turnover_rate" not in renamed.columns:
+            renamed["turnover_rate"] = 0.0
         required_columns = [
             "date",
             "open",
@@ -229,6 +244,7 @@ class AkshareMarketDataProvider(MarketDataProvider):
             "volume",
             "amount",
             "pct_change",
+            "turnover_rate",
         ]
         missing = [column for column in required_columns if column not in renamed.columns]
         if missing:
@@ -256,6 +272,7 @@ class AkshareMarketDataProvider(MarketDataProvider):
                 "成交量": "volume",
                 "成交额": "amount",
                 "涨跌幅": "pct_change",
+                "换手率": "turnover_rate",
             }
         if source_name == "tencent":
             return {

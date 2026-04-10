@@ -8,6 +8,7 @@ from stockagent.data.factory import build_market_data_provider
 from stockagent.events.factory import build_event_provider
 from stockagent.schemas import StoredDailyReport
 from stockagent.services.backtest_service import BacktestService
+from stockagent.services.calibration_service import ModelCalibrationService
 from stockagent.services.order_execution_service import OrderExecutionService
 from stockagent.services.report_history_service import ReportHistoryService
 from stockagent.services.report_service import ReportService
@@ -45,6 +46,11 @@ def parse_args() -> argparse.Namespace:
     backtest.add_argument("--start-date", required=True)
     backtest.add_argument("--end-date", required=True)
     backtest.add_argument("--start-mode", choices=["from_cash", "rebalance"], default="from_cash")
+
+    calibrate = subparsers.add_parser("calibrate")
+    calibrate.add_argument("--horizon-days", type=int, default=3)
+    calibrate.add_argument("--limit", type=int, default=30)
+    calibrate.add_argument("--min-samples", type=int, default=5)
 
     order_plan = subparsers.add_parser("plan-orders")
     order_plan.add_argument("--report-id", required=True)
@@ -180,6 +186,19 @@ def run_backtest(start_date: str, end_date: str, start_mode: str) -> None:
     print(json.dumps(summary.model_dump(), ensure_ascii=False, indent=2))
 
 
+def run_calibrate(horizon_days: int, limit: int, min_samples: int) -> None:
+    with session_scope() as session:
+        reports = ReportHistoryService(DailyReportRepository(session)).list_reports(limit=limit)
+    if not reports:
+        raise SystemExit("No report history found. Run stockagent analyze today first.")
+    calibration = ModelCalibrationService().calibrate(
+        reports,
+        horizon_days=horizon_days,
+        min_samples=min_samples,
+    )
+    print(json.dumps(calibration.model_dump(), ensure_ascii=False, indent=2))
+
+
 def build_or_execute_orders(report_id: str, total_capital: float | None, *, execute: bool) -> None:
     with session_scope() as session:
         replay = ReportHistoryService(DailyReportRepository(session)).replay(report_id)
@@ -227,6 +246,9 @@ def main() -> None:
         return
     if command == "backtest":
         run_backtest(args.start_date, args.end_date, args.start_mode)
+        return
+    if command == "calibrate":
+        run_calibrate(args.horizon_days, args.limit, args.min_samples)
         return
     if command == "plan-orders":
         build_or_execute_orders(args.report_id, args.total_capital, execute=False)

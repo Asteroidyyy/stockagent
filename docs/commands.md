@@ -43,6 +43,12 @@ stockagent latest
 stockagent show candidates
 ```
 
+用历史报告回填后续表现，生成规则校准建议：
+
+```bash
+stockagent calibrate --horizon-days 3 --limit 30
+```
+
 ## 常见使用顺序
 
 第一次或需要刷新股票池时：
@@ -79,6 +85,12 @@ stockagent latest
 
 `stockagent show candidates`
 - 列出当前候选池股票代码。
+
+`stockagent calibrate --horizon-days 3 --limit 30 --min-samples 5`
+- 读取最近 30 份历史报告。
+- 对每个信号模拟报告日后 3 个交易日表现。
+- 按分数段、动作、市场状态和评分因子分桶统计收益、胜率、最大回撤。
+- 输出规则校准建议。样本不足时不会强行建议改参数。
 
 ## 兼容的旧命令
 

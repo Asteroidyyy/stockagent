@@ -149,6 +149,28 @@ class SimulationBatchSummary(BaseModel):
     reports: list[SimulationReport]
 
 
+class CalibrationBucket(BaseModel):
+    name: str
+    sample_count: int
+    avg_return_pct: float
+    win_rate: float = Field(ge=0, le=1)
+    avg_max_drawdown_pct: float
+
+
+class CalibrationReport(BaseModel):
+    generated_at: str
+    horizon_days: int
+    report_count: int
+    signal_count: int
+    valid_sample_count: int
+    overall: CalibrationBucket
+    score_buckets: list[CalibrationBucket]
+    action_buckets: list[CalibrationBucket]
+    market_buckets: list[CalibrationBucket]
+    factor_buckets: list[CalibrationBucket]
+    recommendations: list[str]
+
+
 class BacktestDayResult(BaseModel):
     trade_date: str
     next_trade_date: str | None = None

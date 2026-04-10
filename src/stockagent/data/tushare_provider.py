@@ -111,6 +111,16 @@ class TushareMarketDataProvider(MarketDataProvider):
         volatility_10d = float(pct_change_series.tail(10).std()) if len(prepared) >= 10 else float(
             pct_change_series.std()
         )
+        amount_5d = float(prepared["amount"].tail(5).mean()) if len(prepared) >= 5 else float(prepared["amount"].mean())
+        amount_20d = (
+            float(prepared["amount"].tail(20).mean())
+            if len(prepared) >= 20
+            else float(prepared["amount"].mean())
+        )
+        latest_amount = float(latest["amount"])
+        amount_ratio_5d = latest_amount / amount_5d if amount_5d else 1.0
+        amount_ratio_20d = latest_amount / amount_20d if amount_20d else 1.0
+        turnover_rate = self._fetch_turnover_rate(symbol, latest["date"])
 
         event_tags = []
         if float(latest["close"]) > ma20:
@@ -135,10 +145,32 @@ class TushareMarketDataProvider(MarketDataProvider):
             "momentum_5d": float(latest["close"]) / lookback_close - 1 if lookback_close else 0.0,
             "drawdown_20d": float(latest["close"]) / recent_high - 1 if recent_high else 0.0,
             "volatility_10d": volatility_10d if pd.notna(volatility_10d) else 0.0,
+            "turnover_rate": turnover_rate,
+            "amount_ratio_5d": amount_ratio_5d if pd.notna(amount_ratio_5d) else 1.0,
+            "amount_ratio_20d": amount_ratio_20d if pd.notna(amount_ratio_20d) else 1.0,
             "event_tags": event_tags or ["无重大风险"],
         }
         self.cache.save(self._cache_key(symbol, as_of_date), snapshot)
         return snapshot
+
+    def _fetch_turnover_rate(self, symbol: str, trade_date: pd.Timestamp) -> float:
+        cache_key = f"turnover_{symbol}_{trade_date.strftime('%Y-%m-%d')}"
+        cached = self.cache.load(cache_key)
+        if cached is not None:
+            return float(cached)
+        try:
+            frame = self.client.daily_basic(
+                ts_code=symbol,
+                trade_date=trade_date.strftime("%Y%m%d"),
+                fields="ts_code,trade_date,turnover_rate",
+            )
+            if frame is None or frame.empty:
+                return 0.0
+            turnover_rate = float(frame.iloc[0]["turnover_rate"]) / 100
+            self.cache.save(cache_key, turnover_rate)
+            return turnover_rate
+        except Exception:
+            return 0.0
 
     def _fetch_prepared_history(self, *, symbol: str, as_of_date: str | None = None) -> pd.DataFrame:
         end_date = (as_of_date or date.today().isoformat()).replace("-", "")
