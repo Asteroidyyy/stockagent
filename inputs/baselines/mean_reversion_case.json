@@ -1,0 +1,27 @@
+{
+  "positions": [
+    {
+      "symbol": "600887.SH",
+      "name": "伊利股份",
+      "weight": 0.14,
+      "cost_basis": 27.8,
+      "max_weight": 0.18,
+      "stop_loss_pct": 0.08,
+      "take_profit_pct": 0.18
+    },
+    {
+      "symbol": "000333.SZ",
+      "name": "美的集团",
+      "weight": 0.12,
+      "cost_basis": 65.4,
+      "max_weight": 0.16,
+      "stop_loss_pct": 0.08,
+      "take_profit_pct": 0.2
+    }
+  ],
+  "candidate_symbols": [
+    "600690.SH",
+    "002050.SZ",
+    "603288.SH"
+  ]
+}

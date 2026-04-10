@@ -1,0 +1,19 @@
+{
+  "positions": [
+    {
+      "symbol": "600900.SH",
+      "name": "长江电力",
+      "weight": 0.2,
+      "cost_basis": 28,
+      "max_weight": 0.22
+    },
+    {
+      "symbol": "601088.SH",
+      "name": "中国神华",
+      "weight": 0.15,
+      "cost_basis": 42,
+      "max_weight": 0.18
+    }
+  ],
+  "candidate_symbols": ["600276.SH", "601398.SH", "600886.SH"]
+}

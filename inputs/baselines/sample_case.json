@@ -1,0 +1,22 @@
+{
+  "positions": [
+    {
+      "symbol": "600519.SH",
+      "name": "贵州茅台",
+      "weight": 0.15,
+      "cost_basis": 1450,
+      "max_weight": 0.2
+    },
+    {
+      "symbol": "300750.SZ",
+      "name": "宁德时代",
+      "weight": 0.1,
+      "cost_basis": 260,
+      "max_weight": 0.15
+    }
+  ],
+  "candidate_symbols": [
+    "000001.SZ",
+    "601012.SH"
+  ]
+}

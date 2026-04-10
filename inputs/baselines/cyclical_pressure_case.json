@@ -1,0 +1,27 @@
+{
+  "positions": [
+    {
+      "symbol": "601899.SH",
+      "name": "紫金矿业",
+      "weight": 0.2,
+      "cost_basis": 17.1,
+      "max_weight": 0.2,
+      "stop_loss_pct": 0.09,
+      "take_profit_pct": 0.25
+    },
+    {
+      "symbol": "600938.SH",
+      "name": "中国海油",
+      "weight": 0.18,
+      "cost_basis": 28.3,
+      "max_weight": 0.18,
+      "stop_loss_pct": 0.08,
+      "take_profit_pct": 0.2
+    }
+  ],
+  "candidate_symbols": [
+    "600547.SH",
+    "000933.SZ",
+    "601857.SH"
+  ]
+}

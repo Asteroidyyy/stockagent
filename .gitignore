@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+.env
+stockagent.db
+
+data_cache/
+outputs/
+
+build/
+*.egg-info/
+UNKNOWN.egg-info/

@@ -1,0 +1,19 @@
+{
+  "positions": [
+    {
+      "symbol": "601012.SH",
+      "name": "隆基绿能",
+      "weight": 0.12,
+      "cost_basis": 17.3,
+      "max_weight": 0.15
+    },
+    {
+      "symbol": "000060.SZ",
+      "name": "中金岭南",
+      "weight": 0.1,
+      "cost_basis": 4.5,
+      "max_weight": 0.12
+    }
+  ],
+  "candidate_symbols": ["000060.SZ", "000088.SZ", "000415.SZ"]
+}

@@ -1,0 +1,19 @@
+{
+  "positions": [
+    {
+      "symbol": "600519.SH",
+      "name": "贵州茅台",
+      "weight": 0.28,
+      "cost_basis": 1480,
+      "max_weight": 0.2
+    },
+    {
+      "symbol": "000858.SZ",
+      "name": "五粮液",
+      "weight": 0.16,
+      "cost_basis": 132,
+      "max_weight": 0.15
+    }
+  ],
+  "candidate_symbols": ["600036.SH", "000333.SZ", "601318.SH"]
+}

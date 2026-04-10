@@ -1,0 +1,20 @@
+{
+  "positions": [
+    {
+      "symbol": "300750.SZ",
+      "name": "宁德时代",
+      "weight": 0.18,
+      "cost_basis": 265,
+      "max_weight": 0.18,
+      "stop_loss_pct": 0.1
+    },
+    {
+      "symbol": "002594.SZ",
+      "name": "比亚迪",
+      "weight": 0.12,
+      "cost_basis": 310,
+      "max_weight": 0.16
+    }
+  ],
+  "candidate_symbols": ["601012.SH", "300308.SZ", "688111.SH"]
+}

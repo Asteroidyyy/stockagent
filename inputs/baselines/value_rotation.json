@@ -1,0 +1,19 @@
+{
+  "positions": [
+    {
+      "symbol": "600036.SH",
+      "name": "招商银行",
+      "weight": 0.14,
+      "cost_basis": 33,
+      "max_weight": 0.16
+    },
+    {
+      "symbol": "601398.SH",
+      "name": "工商银行",
+      "weight": 0.12,
+      "cost_basis": 6.2,
+      "max_weight": 0.15
+    }
+  ],
+  "candidate_symbols": ["600030.SH", "601211.SH", "600919.SH"]
+}
